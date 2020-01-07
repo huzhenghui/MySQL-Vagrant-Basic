@@ -1,0 +1,4 @@
+Vagrant/MariaDB/.vagrant/
+Vagrant/MySQL-Community/.vagrant/
+Vagrant/Percona-Server/.vagrant/
+Vagrant/inventory_list

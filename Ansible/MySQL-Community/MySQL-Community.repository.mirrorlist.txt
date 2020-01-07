@@ -1,0 +1,4 @@
+http://mirrors.163.com/mysql/Downloads/MySQL-8.0/
+http://mirrors.sohu.com/mysql/MySQL-8.0/
+http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-8.0/
+http://mirrors.ustc.edu.cn/mysql-repo/yum/mysql-8.0-community/el/7/$basearch/

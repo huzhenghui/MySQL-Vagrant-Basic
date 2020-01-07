@@ -1,0 +1,73 @@
+- hosts: all
+  user: vagrant
+  gather_facts: True
+  tasks:
+
+    - name: stat /etc/yum.repos.d/mysql-community.repo
+      stat:
+        path: /etc/yum.repos.d/mysql-community.repo
+      register: stat_value
+
+    - name: yum install -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+      become: yes
+      become_user: root
+      when: "stat_value.stat.exists == false"
+      yum:
+        name: https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+        state: installed
+      register: yum_value
+      until: "yum_value.failed != true"
+
+    - name: Upload MySQL.repository.mirrorlist.txt
+      become: yes
+      become_user: root
+      copy:
+        src: MySQL-Community.repository.mirrorlist.txt
+        dest: /etc/yum.repos.d/
+
+# [mysql80-community]
+# name=MySQL 8.0 Community Server
+# baseurl=http://repo.mysql.com/yum/mysql-8.0-community/el/7/$basearch/
+# enabled=1
+# gpgcheck=1
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
+    - name: add mirrorlist to repository
+      become: yes
+      become_user: root
+      yum_repository:
+        file: mysql-community
+        name: mysql80-community
+        description: MySQL 8.0 Community Server
+        # http://repo.mysql.com/yum/mysql-8.0-community/el/7/x86_64/
+        baseurl: http://repo.mysql.com/yum/mysql-8.0-community/el/7/$basearch/
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
+        # http://mirrors.163.com/mysql/Downloads/MySQL-8.0/
+        # http://mirrors.sohu.com/mysql/MySQL-8.0/
+        # http://www.mirrorservice.org/sites/ftp.mysql.com/Downloads/MySQL-8.0/
+        # http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-8.0/
+        # http://mirrors.ustc.edu.cn/mysql-repo/yum/mysql-8.0-community/el/7/$basearch/
+        mirrorlist: file:///etc/yum.repos.d/MySQL-Community.repository.mirrorlist.txt
+        state: present
+
+    - name: yum list mysql-community-server
+      yum:
+        list: mysql-community-server
+      register: yum_value
+
+    - name: yum install -y mysql-community-server
+      become: yes
+      become_user: root
+      yum:
+        name: mysql-community-server
+        state: latest
+      when: "yum_value.results | selectattr('yumstate', 'equalto', 'installed') | list | length == 0"
+
+    - name: mysql -V
+      command: mysql -V
+      register: command_value
+
+    # mysql  Ver 8.0.18 for Linux on x86_64 (MySQL Community Server - GPL)
+    - debug: var=command_value.stdout
+
