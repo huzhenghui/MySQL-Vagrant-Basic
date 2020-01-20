@@ -3,6 +3,17 @@
   gather_facts: True
   tasks:
 
+    - name: add MariaDB YUM repository entry for CentOS
+      become: yes
+      become_user: root
+      yum_repository:
+        file: MariaDB
+        name: mariadb
+        description: MariaDB
+        baseurl: http://yum.mariadb.org/10.4/centos7-amd64
+        gpgcheck: true
+        gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+
     - name: yum list mariadb-server
       yum:
         list: mariadb-server
@@ -11,15 +22,16 @@
     - name: Install MariaDB
       become: yes
       become_user: root
+      when: "yum_value.results | selectattr('yumstate', 'equalto', 'installed') | list | length == 0"
       yum:
         name:
-          - mariadb-server
+          - MariaDB-server
+          - MariaDB-client
         state: latest
-      when: "yum_value.results | selectattr('yumstate', 'equalto', 'installed') | list | length == 0"
 
     - name: mysql -V
       command: mysql -V
       register: command_value
 
-    # mysql  Ver 15.1 Distrib 5.5.64-MariaDB, for Linux (x86_64) using readline 5.1
+    # mysql  Ver 15.1 Distrib 10.4.11-MariaDB, for Linux (x86_64) using readline 5.1
     - debug: var=command_value.stdout
