@@ -1,0 +1,3 @@
+[submodule "MySQL-Ansible-Installation"]
+	path = MySQL-Ansible-Installation
+	url = https://github.com/huzhenghui/MySQL-Ansible-Installation
