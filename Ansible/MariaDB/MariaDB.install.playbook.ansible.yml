@@ -1,10 +1,11 @@
+---
 - hosts: all
   user: vagrant
-  gather_facts: True
+  gather_facts: true
   tasks:
 
     - name: add MariaDB YUM repository entry for CentOS
-      become: yes
+      become: yes  # yamllint disable-line
       become_user: root
       yum_repository:
         file: MariaDB
@@ -20,18 +21,22 @@
       register: yum_value
 
     - name: Install MariaDB
-      become: yes
+      become: yes  # yamllint disable-line
       become_user: root
-      when: "yum_value.results | selectattr('yumstate', 'equalto', 'installed') | list | length == 0"
+      when: "yum_value.results | selectattr('yumstate', 'equalto', 'installed') | list | length == 0"  # yamllint disable-line
       yum:
         name:
           - MariaDB-server
           - MariaDB-client
-        state: latest
+        state: installed
+      register: yum_install_result
+      until: "yum_install_result.failed != true"
 
     - name: mysql -V
       command: mysql -V
       register: command_value
+      changed_when: false
 
-    # mysql  Ver 15.1 Distrib 10.4.11-MariaDB, for Linux (x86_64) using readline 5.1
+    # mysql  Ver 15.1 Distrib 10.4.11-MariaDB,
+    # for Linux (x86_64) using readline 5.1
     - debug: var=command_value.stdout
