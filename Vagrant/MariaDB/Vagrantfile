@@ -75,7 +75,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.provision "install", type: "ansible" do |ansible|
       ansible.compatibility_mode = "2.0"
-      ansible.playbook = "../../Ansible/MariaDB/MariaDB.install.playbook.ansible.yml"
+      ansible.playbook = "../../MySQL-Ansible-Installation/MariaDB/MariaDB.install.playbook.ansible.yml"
     end
   end
 end
